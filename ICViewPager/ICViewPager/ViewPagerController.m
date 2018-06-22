@@ -61,6 +61,7 @@
 
 @interface TabView : UIView
 @property (nonatomic, getter = isSelected) BOOL selected;
+@property (nonatomic, getter = isLastItem) BOOL lastItem;
 @property (nonatomic) UIColor *indicatorColor;
 @end
 
@@ -78,36 +79,29 @@
     [self setNeedsDisplay];
 }
 - (void)drawRect:(CGRect)rect {
-    
+
     UIBezierPath *bezierPath;
-    
-    // Draw top line
-    bezierPath = [UIBezierPath bezierPath];
-    [bezierPath moveToPoint:CGPointMake(0.0, 0.0)];
-    [bezierPath addLineToPoint:CGPointMake(CGRectGetWidth(rect), 0.0)];
-    [[UIColor colorWithWhite:197.0/255.0 alpha:0.75] setStroke];
-    [bezierPath setLineWidth:1.0];
+
+    if ( !self.lastItem ) {
+        // Rectangle Drawing
+        bezierPath = [UIBezierPath bezierPathWithRect: CGRectMake(20, 12, 30, 6)];
+        [[UIColor colorWithRed:0.85 green:0.878 blue:0.905 alpha:1] setFill];
+        [bezierPath fill];
+    }
+
+    // Oval Drawing
+    bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(2, 2, 26, 26)];
+    [[UIColor colorWithRed:0.85 green:0.878 blue:0.905 alpha:1] setFill];
+    [bezierPath fill];
+    [[UIColor colorWithRed:0.952 green:0.952 blue:0.952 alpha:1] setStroke];
+    bezierPath.lineWidth = 2;
     [bezierPath stroke];
-    
-    // Draw bottom line
-    bezierPath = [UIBezierPath bezierPath];
-    [bezierPath moveToPoint:CGPointMake(0.0, CGRectGetHeight(rect))];
-    [bezierPath addLineToPoint:CGPointMake(CGRectGetWidth(rect), CGRectGetHeight(rect))];
-    [[UIColor colorWithWhite:197.0/255.0 alpha:0.75] setStroke];
-    [bezierPath setLineWidth:1.0];
-    [bezierPath stroke];
-    
-    // Draw an indicator line if tab is selected
+
+    // Draw an circle if tab is selected
     if (self.selected) {
-        
-        bezierPath = [UIBezierPath bezierPath];
-        
-        // Draw the indicator
-        [bezierPath moveToPoint:CGPointMake(0.0, CGRectGetHeight(rect) - 1.0)];
-        [bezierPath addLineToPoint:CGPointMake(CGRectGetWidth(rect), CGRectGetHeight(rect) - 1.0)];
-        [bezierPath setLineWidth:5.0];
-        [self.indicatorColor setStroke];
-        [bezierPath stroke];
+        bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(6, 6, 18, 18)];
+        [self.indicatorColor setFill];
+        [bezierPath fill];
     }
 }
 @end
@@ -213,13 +207,20 @@
     CGRect frame = self.tabsView.frame;
     frame.origin.x = 0.0;
     frame.origin.y = [self.tabLocation boolValue] ? topLayoutGuide : CGRectGetHeight(self.view.frame) - [self.tabHeight floatValue];
+    frame.origin.y += 29.0; //top margin
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = [self.tabHeight floatValue];
     self.tabsView.frame = frame;
+
+    CGFloat lineY = frame.origin.y + frame.size.height - 1;
+    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, lineY, CGRectGetWidth(frame), 1)];
+    lineView.backgroundColor = [UIColor colorWithWhite:197.0/255.0 alpha:0.75];
+    [self.view addSubview:lineView];
     
     frame = self.contentView.frame;
     frame.origin.x = 0.0;
     frame.origin.y = [self.tabLocation boolValue] ? topLayoutGuide + CGRectGetHeight(self.tabsView.frame) : topLayoutGuide;
+    frame.origin.y += 29.0; //top margin
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = CGRectGetHeight(self.view.frame) - (topLayoutGuide + CGRectGetHeight(self.tabsView.frame)) - CGRectGetHeight(self.tabBarController.tabBar.frame);
     self.contentView.frame = frame;
@@ -371,19 +372,13 @@
     __weak ViewPagerController *weakSelf = self;
     
     if (activeContentIndex == self.activeContentIndex) {
-        
-        [self.pageViewController setViewControllers:@[viewController]
-                                          direction:UIPageViewControllerNavigationDirectionForward
-                                           animated:NO
-                                         completion:^(BOOL completed) {
-                                             weakSelf.animatingToTab = NO;
-                                         }];
+        self.animatingToTab = NO;
         
     } else if (!(activeContentIndex + 1 == self.activeContentIndex || activeContentIndex - 1 == self.activeContentIndex)) {
         
         [self.pageViewController setViewControllers:@[viewController]
                                           direction:(activeContentIndex < self.activeContentIndex) ? UIPageViewControllerNavigationDirectionReverse : UIPageViewControllerNavigationDirectionForward
-                                           animated:YES
+                                           animated:NO
                                          completion:^(BOOL completed) {
                                              
                                              weakSelf.animatingToTab = NO;
@@ -750,9 +745,12 @@
 
     // Setup some forwarding events to hijack the scrollView
     // Keep a reference to the actual delegate
-    self.actualDelegate = ((UIScrollView *)[self.pageViewController.view.subviews objectAtIndex:0]).delegate;
+    UIScrollView *pageScrollView = (UIScrollView *)[self.pageViewController.view.subviews objectAtIndex:0];
+    self.actualDelegate = pageScrollView.delegate;
     // Set self as new delegate
-    ((UIScrollView *)[self.pageViewController.view.subviews objectAtIndex:0]).delegate = self;
+    pageScrollView.delegate = self;
+    pageScrollView.canCancelContentTouches = YES;
+    pageScrollView.delaysContentTouches = NO;
     
     self.pageViewController.dataSource = self;
     self.pageViewController.delegate = self;
@@ -862,6 +860,18 @@
     
     // Select starting tab
     NSUInteger index = [self.startFromSecondTab boolValue] ? 1 : 0;
+    UIViewController *viewController = [self viewControllerAtIndex:index];
+
+    if (!viewController) {
+        viewController = [[UIViewController alloc] init];
+        viewController.view = [[UIView alloc] init];
+        viewController.view.backgroundColor = [UIColor clearColor];
+    }
+
+    [self.pageViewController setViewControllers:@[viewController]
+                                      direction:UIPageViewControllerNavigationDirectionForward
+                                       animated:NO
+                                     completion:nil];
     [self selectTabAtIndex:index];
     
     // Set setup done
@@ -885,6 +895,10 @@
         [tabView addSubview:tabViewContent];
         [tabView setClipsToBounds:YES];
         [tabView setIndicatorColor:self.indicatorColor];
+
+        //Flag last item
+        if ( index == self.tabCount - 1 )
+            [tabView setLastItem:YES];
         
         tabViewContent.center = tabView.center;
         
