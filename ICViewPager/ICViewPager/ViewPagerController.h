@@ -10,7 +10,7 @@
 
 /**
  * Every option has a default value.
- * 
+ *
  * ViewPagerOptionTabHeight: Tab bar's height, defaults to 44.0
  * ViewPagerOptionTabOffset: Tab bar's offset from left, defaults to 56.0
  * ViewPagerOptionTabWidth: Any tab item's width, defaults to 128.0
@@ -67,6 +67,16 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
 - (void)reloadData;
 
 /**
+ * Reloads the current tab and its contents
+ */
+- (void)reloadCurrentPage;
+
+/**
+ * Reloads the contents of the page at the specified index
+ */
+- (UIViewController *)reloadPageAtIndex:(NSUInteger)index;
+
+/**
  * Selects the given tab and shows the content at this index
  *
  * @param index The index of the tab that will be selected
@@ -74,9 +84,9 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
 - (void)selectTabAtIndex:(NSUInteger)index;
 
 /**
- * Reloads the appearance of the tabs view. 
+ * Reloads the appearance of the tabs view.
  * Adjusts tabs' width, offset, the center, fix former/latter tabs cases.
- * Without implementing the - viewPager:valueForOption:withDefault: delegate method, 
+ * Without implementing the - viewPager:valueForOption:withDefault: delegate method,
  * this method does nothing.
  * Calling this method without changing any option will affect the performance.
  */
@@ -87,7 +97,7 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
  * You can make ViewPager to reload its components colors.
  * Changing `ViewPagerTabsView` and `ViewPagerContent` color will have no effect to performance,
  * but `ViewPagerIndicator`, as it will need to iterate through all tabs to update it.
- * Calling this method without changing any color won't affect the performance, 
+ * Calling this method without changing any color won't affect the performance,
  * but will cause your delegate method (if you implemented it) to be called three times.
  */
 - (void)setNeedsReloadColors;
@@ -127,7 +137,7 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
  * Asks dataSource to give a view to display as a tab item.
  * It is suggested to return a view with a clearColor background.
  * So that un/selected states can be clearly seen.
- * 
+ *
  * @param viewPager The viewPager that's subject to
  * @param index The index of the tab whose view is asked
  *
@@ -138,7 +148,7 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
 @optional
 /**
  * The content for any tab. Return a view controller and ViewPager will use its view to show as content.
- * 
+ *
  * @param viewPager The viewPager that's subject to
  * @param index The index of the content whose view is asked
  *
@@ -171,7 +181,7 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
 /**
  * Every time -reloadData method called, ViewPager will ask its delegate for option values.
  * So you don't have to set options from ViewPager itself.
- * You don't have to provide values for all options. 
+ * You don't have to provide values for all options.
  * Just return the values for the interested options and return the given 'value' parameter for the rest.
  *
  * @param viewPager The viewPager that's subject to
@@ -186,7 +196,7 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
  * Use this method to customize the look and feel.
  * viewPager will ask its delegate for colors for its components.
  * And if they are provided, it will use them, otherwise it will use default colors.
- * Also not that, colors for tab and content views will change the tabView's and contentView's background 
+ * Also not that, colors for tab and content views will change the tabView's and contentView's background
  * (you should provide these views with a clearColor to see the colors),
  * and indicator will change its own color.
  *

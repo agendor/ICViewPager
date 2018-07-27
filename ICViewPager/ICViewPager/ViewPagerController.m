@@ -79,16 +79,16 @@
     [self setNeedsDisplay];
 }
 - (void)drawRect:(CGRect)rect {
-
+    
     UIBezierPath *bezierPath;
-
+    
     if ( !self.lastItem ) {
         // Rectangle Drawing
         bezierPath = [UIBezierPath bezierPathWithRect: CGRectMake(20, 12, 30, 6)];
         [[UIColor colorWithRed:0.85 green:0.878 blue:0.905 alpha:1] setFill];
         [bezierPath fill];
     }
-
+    
     // Oval Drawing
     bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(2, 2, 26, 26)];
     [[UIColor colorWithRed:0.85 green:0.878 blue:0.905 alpha:1] setFill];
@@ -96,7 +96,7 @@
     [[UIColor colorWithRed:0.952 green:0.952 blue:0.952 alpha:1] setStroke];
     bezierPath.lineWidth = 2;
     [bezierPath stroke];
-
+    
     // Draw an circle if tab is selected
     if (self.selected) {
         bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(6, 6, 18, 18)];
@@ -211,7 +211,7 @@
     frame.size.width = CGRectGetWidth(self.view.frame);
     frame.size.height = [self.tabHeight floatValue];
     self.tabsView.frame = frame;
-
+    
     CGFloat lineY = frame.size.height - 1;
     UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, lineY, CGRectGetWidth(frame), 1)];
     lineView.backgroundColor = [UIColor colorWithWhite:197.0/255.0 alpha:0.75];
@@ -742,7 +742,7 @@
                                                               navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal
                                                                             options:nil];
     [self addChildViewController:self.pageViewController];
-
+    
     // Setup some forwarding events to hijack the scrollView
     // Keep a reference to the actual delegate
     UIScrollView *pageScrollView = (UIScrollView *)[self.pageViewController.view.subviews objectAtIndex:0];
@@ -861,13 +861,13 @@
     // Select starting tab
     NSUInteger index = [self.startFromSecondTab boolValue] ? 1 : 0;
     UIViewController *viewController = [self viewControllerAtIndex:index];
-
+    
     if (!viewController) {
         viewController = [[UIViewController alloc] init];
         viewController.view = [[UIView alloc] init];
         viewController.view.backgroundColor = [UIColor clearColor];
     }
-
+    
     [self.pageViewController setViewControllers:@[viewController]
                                       direction:UIPageViewControllerNavigationDirectionForward
                                        animated:NO
@@ -878,6 +878,34 @@
     self.defaultSetupDone = YES;
 }
 
+- (void)reloadCurrentPage {
+    UIViewController *reloadedViewController = [self reloadPageAtIndex:self.activeTabIndex];
+    [self.pageViewController setViewControllers:@[reloadedViewController]
+                                      direction:UIPageViewControllerNavigationDirectionForward
+                                       animated:NO
+                                     completion:nil];
+}
+
+- (UIViewController *)reloadPageAtIndex:(NSUInteger)index {
+    UIViewController *reloadedViewController = [self reloadControllerAtIndex:index];
+    self.defaultSetupDone = YES;
+    
+    return reloadedViewController;
+}
+
+- (UIViewController *)reloadControllerAtIndex:(NSUInteger)index {
+    self.contents[index] = [NSNull null];
+    UIViewController *viewController = [self viewControllerAtIndex:index];
+    
+    if (!viewController) {
+        viewController = [[UIViewController alloc] init];
+        viewController.view = [[UIView alloc] init];
+        viewController.view.backgroundColor = [UIColor clearColor];
+    }
+    
+    return viewController;
+}
+
 - (TabView *)tabViewAtIndex:(NSUInteger)index {
     
     if (index >= self.tabCount) {
@@ -885,7 +913,7 @@
     }
     
     if ([[self.tabs objectAtIndex:index] isEqual:[NSNull null]]) {
-
+        
         // Get view from dataSource
         UIView *tabViewContent = [self.dataSource viewPager:self viewForTabAtIndex:index];
         tabViewContent.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
@@ -895,7 +923,7 @@
         [tabView addSubview:tabViewContent];
         [tabView setClipsToBounds:YES];
         [tabView setIndicatorColor:self.indicatorColor];
-
+        
         //Flag last item
         if ( index == self.tabCount - 1 )
             [tabView setLastItem:YES];
@@ -1078,4 +1106,3 @@
 }
 
 @end
-
