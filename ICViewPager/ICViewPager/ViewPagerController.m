@@ -79,30 +79,25 @@
     [self setNeedsDisplay];
 }
 - (void)drawRect:(CGRect)rect {
-    
+
     UIBezierPath *bezierPath;
-    
+    UIColor *strokeColor = [UIColor colorWithRed:0.937 green:0.937 blue:0.937 alpha:1];
+    UIColor *fillColor = (self.selected) ? self.indicatorColor : UIColor.whiteColor;
+
     if ( !self.lastItem ) {
         // Rectangle Drawing
-        bezierPath = [UIBezierPath bezierPathWithRect: CGRectMake(20, 12, 30, 6)];
-        [[UIColor colorWithRed:0.85 green:0.878 blue:0.905 alpha:1] setFill];
+        bezierPath = [UIBezierPath bezierPathWithRect: CGRectMake(9, 10, 62, 2)];
+        [strokeColor setFill];
         [bezierPath fill];
     }
-    
+
     // Oval Drawing
-    bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(2, 2, 26, 26)];
-    [[UIColor colorWithRed:0.85 green:0.878 blue:0.905 alpha:1] setFill];
+    bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(1, 2, 18, 18)];
+    [fillColor setFill];
     [bezierPath fill];
-    [[UIColor colorWithRed:0.952 green:0.952 blue:0.952 alpha:1] setStroke];
+    [strokeColor setStroke];
     bezierPath.lineWidth = 2;
     [bezierPath stroke];
-    
-    // Draw an circle if tab is selected
-    if (self.selected) {
-        bezierPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(6, 6, 18, 18)];
-        [self.indicatorColor setFill];
-        [bezierPath fill];
-    }
 }
 @end
 
