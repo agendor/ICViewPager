@@ -207,11 +207,6 @@
     frame.size.height = [self.tabHeight floatValue];
     self.tabsView.frame = frame;
     
-    CGFloat lineY = frame.size.height - 1;
-    UIView *lineView = [[UIView alloc] initWithFrame:CGRectMake(0, lineY, CGRectGetWidth(frame), 1)];
-    lineView.backgroundColor = [UIColor colorWithWhite:197.0/255.0 alpha:0.75];
-    [self.tabsView addSubview:lineView];
-    
     frame = self.contentView.frame;
     frame.origin.x = 0.0;
     frame.origin.y = [self.tabLocation boolValue] ? topLayoutGuide + CGRectGetHeight(self.tabsView.frame) : topLayoutGuide;
