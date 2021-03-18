@@ -391,6 +391,11 @@
                                              weakSelf.animatingToTab = NO;
                                          }];
     }
+
+    if (self.tabCount < self.activeContentIndex) {
+        _activeContentIndex = activeContentIndex;
+        return;
+    }
     
     // Clean out of sight contents
     NSInteger index;
