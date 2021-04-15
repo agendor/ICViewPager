@@ -400,14 +400,16 @@
     // Clean out of sight contents
     NSInteger index;
     index = self.activeContentIndex - 1;
-    if (index >= 0 &&
+    if (index < self.contents.count &&
+        index >= 0 &&
         index != activeContentIndex &&
         index != activeContentIndex - 1)
     {
         [self.contents replaceObjectAtIndex:index withObject:[NSNull null]];
     }
     index = self.activeContentIndex;
-    if (index != activeContentIndex - 1 &&
+    if (index < self.contents.count &&
+        index != activeContentIndex - 1 &&
         index != activeContentIndex &&
         index != activeContentIndex + 1)
     {
